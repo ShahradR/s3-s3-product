@@ -1,0 +1,4 @@
+[submodule "submodules/s3-logging"]
+	path = submodules/s3-logging
+	url = https://github.com/ShahradR/s3-logging.git
+	branch = main
