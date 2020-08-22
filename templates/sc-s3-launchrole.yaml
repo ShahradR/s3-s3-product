@@ -64,6 +64,12 @@ Resources:
                   - "cloudformation:ValidateTemplate"
                   - "cloudformation:UpdateStack"
                 Resource: "*"
+              - Sid: S3BucketSecretSID
+                Effect: Allow
+                Action:
+                  - ssm:GetParameters
+                Resource:
+                  Fn::Sub: "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/s3-logging-iam-role"
 Outputs:
   LaunchRoleArn:
     Value:
