@@ -1,0 +1,14 @@
+---
+project:
+  name: sc-s3-product
+  regions:
+    - ca-central-1
+  s3_bucket: brokentech-cfn
+
+tests:
+  s3-portfolio-with-default-parameters:
+    template: ./templates/s3-portfolio.yaml
+    parameters:
+      PortfolioName: S3 buckets
+      PortfolioDescription: S3 buckets
+      TemplateUrlPrefix: https://$[taskcat_autobucket].s3.ca-central-1.amazonaws.com/sc-s3-product/
