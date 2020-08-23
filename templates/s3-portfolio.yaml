@@ -1,0 +1,77 @@
+---
+Description: |
+  Porfolio containing all S3-related products, along with the necessary roles
+  and configurations to allow end-users to provision resources.
+
+Parameters:
+  PortfolioName:
+    Type: String
+    Description: Name for the Service Catalog portfolio.
+  PortfolioProvider:
+    Type: String
+    Description: |
+      (Optional) Name of the portfolio's provider. The provieder appears in the
+      UI when users list available portfolios. Defaults to "BrokenTech."
+    Default: BrokenTech
+  PortfolioDescription:
+    Type: String
+    Description: |
+      (Optional) Description for the portfolio. The description appears in the
+      UI when users list available portfolios. Defaults to the description in
+      the template.
+    Default: |
+      Portfolio containing a collection of AWS Simple Storage Service (S3)
+      products.
+  TemplateUrlPrefix:
+    Type: String
+    Description: |
+      Address for the S3 bucket where the CloudFormation templates are
+      deployed. Should be passed in the format below, where [bucket] is the
+      name of your S3 bucket. Note the tailing "/" at the end of the address.
+
+      https://[bucket].s3.ca-central-1.amazonaws.com/sc-s3-product/
+
+Resources:
+  S3Portfolio:
+    Type: AWS::ServiceCatalog::Portfolio
+    Properties:
+      ProviderName:
+        Ref: PortfolioProvider
+      Description:
+        Ref: PortfolioDescription
+      DisplayName:
+        Ref: PortfolioName
+
+  S3ServerLoggingProduct:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        TemplateUrlPrefix:
+          Fn::Sub: "${TemplateUrlPrefix}submodules/s3-logging/"
+      TemplateURL:
+        Fn::Sub: "${TemplateUrlPrefix}submodules/s3-logging/templates/s3-logging-product.yaml"
+      TimeoutInMinutes: 5
+
+  S3PortfolioLaunchRole:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        Fn::Sub: "${TemplateUrlPrefix}templates/sc-s3-launchrole.yaml"
+
+  S3ServerLoggingPortfolioAssociation:
+    Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
+    Properties:
+      PortfolioId:
+        Ref: S3Portfolio
+      ProductId:
+        Fn::GetAtt: [S3ServerLoggingProduct, Outputs.ProductId]
+
+  LaunchRoleConstraint:
+    Type: AWS::ServiceCatalog::LaunchRoleConstraint
+    Properties:
+      PortfolioId:
+        Ref: S3Portfolio
+      ProductId:
+        Fn::GetAtt: [S3ServerLoggingProduct, Outputs.ProductId]
+      RoleArn:
+        Fn::GetAtt: [S3PortfolioLaunchRole, Outputs.LaunchRoleArn]
